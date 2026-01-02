@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickShare - スマートなファイル共有</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- JSZip Library for Zipping multiple files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #f43f5e;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #pageLoader {
+            position: fixed;
+            inset: 0;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .pulse-loader {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .view-content {
+            padding: 32px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-action:active {
+            transform: scale(0.97);
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        .drop-zone {
+            border: 2px dashed #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background: #f5f3ff;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .hidden-view {
+            display: none;
+        }
+
+        .limit-warning {
+            border-color: #f43f5e !important;
+            background-color: #fff1f2 !important;
+        }
+
+        #hintOverlay {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 初期ローディング -->
+    <div id="pageLoader">
+        <div class="pulse-loader"></div>
+        <p class="mt-6 font-semibold text-slate-500 tracking-widest text-sm uppercase">QuickShare</p>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="px-6 pt-6 flex items-center justify-between">
+            <div id="navHeader" class="hidden">
+                <button onclick="showView('mainView')" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+            <div id="navPlaceholder" class="w-10 h-10"></div>
+            
+            <span class="text-sm font-bold text-slate-400 uppercase tracking-tighter">Ooya QuickShare</span>
+            
+            <button onclick="toggleHint(true)" class="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors">
+                <i class="fas fa-lightbulb text-xs"></i>
+                <span class="text-xs font-bold">ヒント</span>
+            </button>
+        </div>
+
+        <!-- Main View -->
+        <div id="mainView" class="view-content">
+            <div class="text-center mb-10 mt-4">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl mb-4">
+                    <i class="fas fa-paper-plane text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800">Ooya QuickShare</h1>
+                <p class="text-slate-400 text-sm mt-1 font-medium">スマートに、素早く、安全に共有</p>
+            </div>
+
+            <div class="space-y-4">
+                <button onclick="showView('addView')" class="btn-action w-full bg-gradient-primary text-white py-4 px-6 rounded-2xl flex items-center justify-between group">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <span class="font-bold text-lg">送信する</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-white/50 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+                <button onclick="showView('receiveView')" class="btn-action w-full bg-slate-50 hover:bg-slate-100 text-slate-700 py-4 px-6 rounded-2xl border border-slate-200 flex items-center justify-between group">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center mr-4 shadow-sm">
+                            <i class="fas fa-download text-indigo-500"></i>
+                        </div>
+                        <span class="font-bold text-lg text-slate-800">受信する</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-300 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+                <p class="text-slate-400 text-center text-xs mt-4 font-medium">注意：期限の過ぎたファイルは削除されます。</p>
+            </div>
+        </div>
+
+        <!-- Add View -->
+        <div id="addView" class="view-content hidden-view">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-slate-800">ファイルの送信</h2>
+                <p class="text-sm text-slate-400">相手が識別しやすい題名を付けてください</p>
+            </div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">題名</label>
+                    <input type="text" id="fileTitle" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none focus:bg-white transition-all" placeholder="例: プロジェクト企画書">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">ファイル</label>
+                        <span id="totalSizeDisplay" class="text-[10px] font-bold text-slate-400">合計: 0MB / 30MB</span>
+                    </div>
+                    <div id="dropZone" class="drop-zone relative rounded-2xl p-8 text-center cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" class="hidden" multiple onchange="updateFileList()">
+                        <div class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-cloud-arrow-up text-xl"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-600" id="filePlaceholder">クリックして選択</p>
+                        <p class="text-xs text-slate-400 mt-1">またはドラッグ＆ドロップ</p>
+                    </div>
+                    <p id="sizeErrorMessage" class="text-[10px] text-rose-500 font-bold mt-1 hidden text-center">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>容量制限(30MB)を超えています。ファイルを減らしてください。
+                    </p>
+                    <ul id="fileListDisplay" class="mt-4 space-y-2 max-h-40 overflow-y-auto custom-scroll"></ul>
+                </div>
+
+                <button id="uploadBtn" onclick="handleUpload()" class="btn-action w-full bg-slate-800 text-white py-4 rounded-xl font-bold text-lg hover:bg-slate-900 shadow-lg shadow-slate-200">
+                    アップロード
+                </button>
+            </div>
+        </div>
+
+        <!-- Result View -->
+        <div id="resultView" class="view-content hidden-view text-center">
+            <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-check text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">準備完了！</h2>
+            <p class="text-slate-400 text-sm mb-8 px-4">以下のコードを相手に共有してください。<br>相手が入力するとダウンロードが始まります。</p>
+            
+            <div class="relative group mb-8">
+                <div id="passcodeDisplay" class="bg-slate-50 border-2 border-slate-100 text-5xl font-mono font-bold tracking-[0.2em] py-8 rounded-3xl text-indigo-600 shadow-inner">
+                    -----
+                </div>
+                <button onclick="copyPasscode()" class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white border border-slate-200 px-4 py-2 rounded-full text-xs font-bold text-slate-500 hover:text-indigo-600 shadow-sm transition-all">
+                    <i class="far fa-copy mr-1"></i> コードをコピー
+                </button>
+            </div>
+            <button onclick="showView('mainView')" class="text-sm font-bold text-slate-400 hover:text-indigo-500 transition-colors mt-4">
+                トップに戻る
+            </button>
+        </div>
+
+        <!-- Receive View -->
+        <div id="receiveView" class="view-content hidden-view text-center">
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-slate-800">ファイルを受信</h2>
+                <p class="text-sm text-slate-400">5桁のパスコードを入力してください</p>
+            </div>
+
+            <div class="space-y-6">
+                <input type="text" id="receiveCode" maxlength="5" inputmode="numeric" class="w-full text-center text-4xl font-mono font-bold p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl focus:border-indigo-500 focus:bg-white focus:outline-none tracking-[0.3em] text-slate-800" placeholder="00000">
+                
+                <button onclick="handleReceive()" id="receiveBtn" class="btn-action w-full bg-gradient-primary text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200">
+                    ダウンロード
+                </button>
+            </div>
+        </div>
+
+        <!-- Inner Loading Overlay -->
+        <div id="innerLoader" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-40">
+            <div class="w-10 h-10 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p class="mt-4 text-sm font-bold text-slate-600" id="loadingText">処理中...</p>
+        </div>
+
+        <!-- Hint Modal Overlay -->
+        <div id="hintOverlay" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end justify-center z-50 p-4">
+            <div class="bg-white w-full rounded-3xl p-6 shadow-2xl transform translate-y-0 transition-transform">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-2 text-amber-600">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3 class="font-bold text-lg">操作のヒント</h3>
+                    </div>
+                    <button onclick="toggleHint(false)" class="text-slate-300 hover:text-slate-500"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <ul class="space-y-4 text-sm text-slate-600">
+                    <li class="flex items-start">
+                        <span class="bg-indigo-50 text-indigo-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mr-3 mt-0.5 shrink-0">1</span>
+                        <p>送信したいファイルを選択し、5桁のコードを発行します。</p>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-indigo-50 text-indigo-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mr-3 mt-0.5 shrink-0">2</span>
+                        <p>相手にそのコードを伝えてください。</p>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-indigo-50 text-indigo-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mr-3 mt-0.5 shrink-0">3</span>
+                        <p>相手が「受信する」からコードを入れると、複数ファイルの場合はZIPにまとめて自動保存されます。</p>
+                    </li>
+                </ul>
+                <button onclick="toggleHint(false)" class="w-full mt-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                    閉じる
+                </button>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-slate-800 text-white text-sm font-medium shadow-2xl opacity-0 translate-y-4 pointer-events-none transition-all duration-300 z-50">
+            メッセージ
+        </div>
+    </div>
+
+    <script>
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzbavrwHx1XfGlYIdn_hyDoM1SaPXBn98dUzTIvJeZ3_PQIiZQNEWVRx7mpVl0goUU/exec";
+        
+        const MAX_TOTAL_SIZE_MB = 30;
+        const MAX_TOTAL_SIZE_BYTES = MAX_TOTAL_SIZE_MB * 1024 * 1024;
+
+        window.onload = () => {
+            setTimeout(() => {
+                const loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.visibility = 'hidden', 500);
+                }
+            }, 800);
+        };
+
+        function showView(viewId) {
+            const views = ['mainView', 'addView', 'resultView', 'receiveView'];
+            const nav = document.getElementById('navHeader');
+            const placeholder = document.getElementById('navPlaceholder');
+            
+            if (viewId === 'mainView') {
+                nav.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            } else {
+                nav.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === viewId) {
+                    el.classList.remove('hidden-view');
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, 50);
+                } else {
+                    el.classList.add('hidden-view');
+                }
+            });
+        }
+
+        function toggleHint(show) {
+            const overlay = document.getElementById('hintOverlay');
+            overlay.classList.toggle('hidden', !show);
+        }
+
+        function updateFileList() {
+            const input = document.getElementById('fileInput');
+            const placeholder = document.getElementById('filePlaceholder');
+            const display = document.getElementById('fileListDisplay');
+            const totalSizeDisplay = document.getElementById('totalSizeDisplay');
+            const dropZone = document.getElementById('dropZone');
+            const errorMsg = document.getElementById('sizeErrorMessage');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            display.innerHTML = '';
+            let totalSizeBytes = 0;
+            
+            if (input.files.length > 0) {
+                placeholder.innerText = `${input.files.length} 件のファイル`;
+                
+                Array.from(input.files).forEach(file => {
+                    totalSizeBytes += file.size;
+                    const li = document.createElement('li');
+                    li.className = "flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100";
+                    li.innerHTML = `
+                        <div class="flex items-center overflow-hidden">
+                            <i class="far fa-file-alt text-indigo-400 mr-3"></i>
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-slate-700 truncate">${file.name}</p>
+                                <p class="text-[10px] text-slate-400">${(file.size/1024).toFixed(1)} KB</p>
+                            </div>
+                        </div>
+                    `;
+                    display.appendChild(li);
+                });
+
+                const totalMB = (totalSizeBytes / (1024 * 1024)).toFixed(1);
+                totalSizeDisplay.innerText = `合計: ${totalMB}MB / ${MAX_TOTAL_SIZE_MB}MB`;
+                
+                if (totalSizeBytes > MAX_TOTAL_SIZE_BYTES) {
+                    totalSizeDisplay.className = "text-[10px] font-bold text-rose-500";
+                    dropZone.classList.add('limit-warning');
+                    errorMsg.classList.remove('hidden');
+                    uploadBtn.disabled = true;
+                } else {
+                    totalSizeDisplay.className = "text-[10px] font-bold text-slate-400";
+                    dropZone.classList.remove('limit-warning');
+                    errorMsg.classList.add('hidden');
+                    uploadBtn.disabled = false;
+                }
+            } else {
+                placeholder.innerText = 'クリックして選択';
+                totalSizeDisplay.innerText = `合計: 0MB / ${MAX_TOTAL_SIZE_MB}MB`;
+                uploadBtn.disabled = false;
+            }
+        }
+
+        function showToast(text, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.innerText = text;
+            toast.style.background = type === 'error' ? '#f43f5e' : '#1e293b';
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        function toggleLoading(show, text = '処理中...') {
+            const loader = document.getElementById('innerLoader');
+            document.getElementById('loadingText').innerText = text;
+            loader.classList.toggle('hidden', !show);
+        }
+
+        function generatePasscode() {
+            return Math.floor(10000 + Math.random() * 90000).toString();
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function handleUpload() {
+            const title = document.getElementById('fileTitle').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!title || fileInput.files.length === 0) {
+                showToast("題名とファイルを入力してください", "error");
+                return;
+            }
+
+            let totalSizeBytes = 0;
+            for (let file of fileInput.files) { totalSizeBytes += file.size; }
+            if (totalSizeBytes > MAX_TOTAL_SIZE_BYTES) {
+                showToast("容量制限を超えています", "error");
+                return;
+            }
+
+            toggleLoading(true, 'ファイルを準備中...');
+
+            try {
+                const passcode = generatePasscode();
+                const filesData = [];
+                
+                for (let file of fileInput.files) {
+                    const base64 = await fileToBase64(file);
+                    filesData.push({
+                        name: file.name,
+                        type: file.type,
+                        data: base64
+                    });
+                }
+
+                toggleLoading(true, 'サーバーへ送信中...');
+
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'upload',
+                        title: title,
+                        passcode: passcode,
+                        files: JSON.stringify(filesData)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('passcodeDisplay').innerText = passcode;
+                    toggleLoading(false);
+                    showView('resultView');
+                    showToast("送信が完了しました！");
+                } else {
+                    throw new Error("Upload Failed");
+                }
+            } catch (error) {
+                console.error(error);
+                toggleLoading(false);
+                showToast("エラーが発生しました", "error");
+            }
+        }
+
+        /**
+         * Base64データをバイナリ(Uint8Array)に変換
+         */
+        function base64ToUint8(dataUrl) {
+            const base64 = dataUrl.split(',')[1];
+            const binary = atob(base64);
+            const array = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                array[i] = binary.charCodeAt(i);
+            }
+            return array;
+        }
+
+        /**
+         * 強力なダウンロード処理 (単一ファイル)
+         */
+        function triggerDownload(blob, filename) {
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+            }, 100);
+        }
+
+        /**
+         * 受信処理
+         * 複数ファイルの場合はZIPにまとめる
+         */
+        async function handleReceive() {
+            const code = document.getElementById('receiveCode').value.trim();
+            if (code.length !== 5) {
+                showToast("5桁のコードを入力してください", "error");
+                return;
+            }
+
+            toggleLoading(true, 'ファイルを検索中...');
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'receive',
+                        passcode: code
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.found && result.files) {
+                    const files = typeof result.files === 'string' ? JSON.parse(result.files) : result.files;
+                    const folderTitle = result.title || "QuickShare_Files";
+
+                    if (files.length === 1) {
+                        // ファイルが1つの場合はそのままダウンロード
+                        toggleLoading(true, 'ダウンロード中...');
+                        const file = files[0];
+                        const uint8 = base64ToUint8(file.data);
+                        const blob = new Blob([uint8], { type: file.type || 'application/octet-stream' });
+                        triggerDownload(blob, file.name);
+                        showToast(`「${file.name}」を保存しました`);
+                    } else if (files.length > 1) {
+                        // ファイルが複数の場合はZIPにまとめる
+                        toggleLoading(true, 'ZIPに圧縮中...');
+                        const zip = new JSZip();
+                        
+                        files.forEach(file => {
+                            const uint8 = base64ToUint8(file.data);
+                            zip.file(file.name, uint8);
+                        });
+
+                        const content = await zip.generateAsync({ type: "blob" });
+                        triggerDownload(content, `${folderTitle}.zip`);
+                        showToast(`${files.length}個のファイルをZIPで保存しました`);
+                    }
+                } else {
+                    showToast("無効なコードか、期限切れです", "error");
+                }
+            } catch (error) {
+                console.error(error);
+                showToast("通信エラーが発生しました", "error");
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function copyPasscode() {
+            const code = document.getElementById('passcodeDisplay').innerText;
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = code;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            showToast("コピーしました");
+        }
+    </script>
+</body>
+</html>
