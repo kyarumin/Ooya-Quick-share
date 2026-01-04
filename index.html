@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-     <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
@@ -22,20 +21,19 @@
             --accent: #f43f5e;
         }
 
-        body{
-    font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
-    background: #f8fafc;
-    color: #1e293b;
-    margin: 0;
-    /* 1. 画面全体を縦並びの箱として定義 */
-    display: flex;
-    flex-direction: column;
-    /* 2. 最低でも画面の高さ100%分は確保する */
-    min-height: 100vh;
-}
+        /* ページ全体の設定 */
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 横方向の中央寄せ */
+            min-height: 100vh;   /* 画面の高さいっぱいを確保 */
         }
 
-        /* Loading Screen */
+        /* Loading Screen：画面全体に固定 */
         #pageLoader {
             position: fixed;
             inset: 0;
@@ -44,7 +42,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 1000;
             transition: opacity 0.5s ease, visibility 0.5s;
         }
 
@@ -63,22 +61,20 @@
         }
 
         /* Container & Layout */
-       .app-container {
-    /* 3. 余ったスペースをこの要素がすべて占有して、フッターを下に押し出す */
-    flex: 1 0 auto;
-    
-    /* 4. align-items: centerの代わりに、margin: autoで中央に寄せる */
-    margin: 40px auto; 
-    
-    width: 100%;
-    max-width: 420px;
-    background: white;
-    border-radius: 32px;
-    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.03);
-}
+        .app-container {
+            flex-grow: 1; /* 余ったスペースを埋めてフッターを押し下げる */
+            width: 100%;
+            max-width: 420px;
+            margin: 40px 20px; /* 上下に余白 */
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+        }
 
         .view-content {
             padding: 32px;
@@ -125,55 +121,45 @@
         #hintOverlay {
             transition: all 0.3s ease;
         }
-   /* フッター全体のスタイル */
-.app-footer {
-    background-color: #3765ad;
-    width: 100%;
-    /* 5. フッターが画面外に潰れないように固定 */
-    flex-shrink: 0;
-    
-    padding: 24px 0 40px 0;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-}
 
-/* リンクの並び */
-.footer-nav {
-    max-width: 420px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+        /* フッター：常に画面下部に */
+        .app-footer {
+            background-color: #3765ad;
+            width: 100%;
+            flex-shrink: 0; /* 潰れないように固定 */
+            padding: 24px 0 40px 0;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+        }
 
-/* 個別のリンク（タップしやすいよう余白を持たせる） */
-.footer-item {
-    color: white;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 10px 16px;
-    transition: opacity 0.2s;
-    opacity: 0.9;
-}
+        .footer-nav {
+            max-width: 420px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-.footer-item:active {
-    opacity: 0.5; /* タップした時のフィードバック */
-}
+        .footer-item {
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 16px;
+            transition: opacity 0.2s;
+            opacity: 0.9;
+        }
 
-/* リンク間の区切り線 */
-.footer-divider {
-    width: 1px;
-    height: 12px;
-    background-color: rgba(255, 255, 255, 0.2);
-}
+        .footer-item:active {
+            opacity: 0.5;
+        }
 
-/* ページ全体の調整 */
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}    </style>
+        .footer-divider {
+            width: 1px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
 <body>
 
@@ -343,19 +329,24 @@ body {
         </div>
     </div>
 
+    <footer class="app-footer">
+        <div class="footer-nav">
+            <a href="https://example.com/terms" class="footer-item">利用規約</a>
+            <span class="footer-divider"></span>
+            <a href="https://example.com/privacy" class="footer-item">プライバシー</a>
+            <span class="footer-divider"></span>
+            <a href="https://example.com/contact" class="footer-item">お問い合わせ</a>
+        </div>
+    </footer>
+
     <script>
-        /**
-         * App Configuration
-         */
+        // JSコードは変更なし（そのまま継承）
         const CONFIG = {
             GAS_URL: "https://script.google.com/macros/s/AKfycbxyryD5tj3wXyKQdSXsM-PQ6D5iw27rDJ4FiAyutwdrih12aVRO3tdmWy5oQgmrZ2Md/exec",
             MAX_SIZE_MB: 30,
             get MAX_SIZE_BYTES() { return this.MAX_SIZE_MB * 1024 * 1024; }
         };
 
-        /**
-         * Initial Load Handler
-         */
         window.addEventListener('load', () => {
             const loader = document.getElementById('pageLoader');
             setTimeout(() => {
@@ -366,9 +357,6 @@ body {
             }, 800);
         });
 
-        /**
-         * Navigation Logic
-         */
         function showView(viewId) {
             const views = ['mainView', 'addView', 'resultView', 'receiveView'];
             const nav = document.getElementById('navHeader');
@@ -398,9 +386,6 @@ body {
             });
         }
 
-        /**
-         * UI State Helpers
-         */
         function toggleHint(show) {
             const overlay = document.getElementById('hintOverlay');
             overlay.classList.toggle('hidden', !show);
@@ -425,9 +410,6 @@ body {
             }, 3000);
         }
 
-        /**
-         * File Selection Logic
-         */
         function updateFileList() {
             const input = document.getElementById('fileInput');
             const placeholder = document.getElementById('filePlaceholder');
@@ -442,7 +424,6 @@ body {
             
             if (input.files.length > 0) {
                 placeholder.innerText = `${input.files.length} 件のファイル`;
-                
                 Array.from(input.files).forEach(file => {
                     totalSizeBytes += file.size;
                     const li = document.createElement('li');
@@ -483,9 +464,6 @@ body {
             }
         }
 
-        /**
-         * Utilities
-         */
         function generatePasscode() {
             return Math.floor(10000 + Math.random() * 90000).toString();
         }
@@ -522,9 +500,6 @@ body {
             }, 100);
         }
 
-        /**
-         * Action Handlers
-         */
         async function handleUpload() {
             const titleInput = document.getElementById('fileTitle');
             const title = titleInput.value.trim();
@@ -547,7 +522,6 @@ body {
             try {
                 const passcode = generatePasscode();
                 const filesData = [];
-                
                 for (let file of fileInput.files) {
                     const base64 = await fileToBase64(file);
                     filesData.push({
@@ -570,14 +544,11 @@ body {
                 });
 
                 const result = await response.json();
-
                 if (result.success) {
                     document.getElementById('passcodeDisplay').innerText = passcode;
-                    // Reset fields
                     titleInput.value = '';
                     fileInput.value = '';
                     updateFileList();
-                    
                     toggleLoading(false);
                     showView('resultView');
                     showToast("送信が完了しました！");
@@ -612,7 +583,6 @@ body {
                 });
 
                 const result = await response.json();
-
                 if (result.found && result.files) {
                     const files = typeof result.files === 'string' ? JSON.parse(result.files) : result.files;
                     const folderTitle = result.title || "QuickShare_Files";
@@ -627,17 +597,15 @@ body {
                     } else if (files.length > 1) {
                         toggleLoading(true, 'ZIPに圧縮中...');
                         const zip = new JSZip();
-                        
                         files.forEach(file => {
                             const uint8 = base64ToUint8(file.data);
                             zip.file(file.name, uint8);
                         });
-
                         const content = await zip.generateAsync({ type: "blob" });
                         triggerDownload(content, `${folderTitle}.zip`);
                         showToast(`${files.length}個のファイルをZIPで保存しました`);
                     }
-                    codeInput.value = ''; // Success reset
+                    codeInput.value = '';
                 } else {
                     showToast("無効なコードか、期限切れです", "error");
                 }
@@ -649,17 +617,12 @@ body {
             }
         }
 
-        /**
-         * Clipboard Utility
-         */
         async function copyPasscode() {
             const code = document.getElementById('passcodeDisplay').innerText;
-            
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(code);
                 } else {
-                    // Fallback for older browsers or insecure contexts
                     const dummy = document.createElement("textarea");
                     document.body.appendChild(dummy);
                     dummy.value = code;
@@ -669,19 +632,9 @@ body {
                 }
                 showToast("コピーしました");
             } catch (err) {
-                console.error('Failed to copy: ', err);
                 showToast("コピーに失敗しました", "error");
             }
         }
     </script>
-   <footer class="app-footer">
-    <div class="footer-nav">
-        <a href="https://example.com/terms" class="footer-item">利用規約</a>
-        <span class="footer-divider"></span>
-        <a href="https://example.com/privacy" class="footer-item">プライバシー</a>
-        <span class="footer-divider"></span>
-        <a href="https://example.com/contact" class="footer-item">お問い合わせ</a>
-    </div>
-</footer>
 </body>
 </html>
