@@ -1,11 +1,13 @@
 {
-  "name": "Ooya Quickshare",
-  "short_name": "ooya share",
-  "start_url": "./",
+  "name": "Ooya QuickShare",
+  "short_name": "QuickShare",
+  "description": "スマートで安全なファイル共有サービス",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#1a1a2e",
+  "theme_color": "#6366f1",
   "icons": [
     {
       "src": "apple-touch-icon.png",
