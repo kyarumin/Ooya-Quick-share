@@ -192,7 +192,7 @@
                 <div>
                     <div class="flex justify-between items-end mb-2">
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">ファイル</label>
-                        <span id="totalSizeDisplay" class="text-[10px] font-bold text-slate-400">合計: 0MB / 30MB</span>
+                        <span id="totalSizeDisplay" class="text-[10px] font-bold text-slate-400">合計: 0MB / 20MB</span>
                     </div>
                     <div id="dropZone" class="drop-zone relative rounded-2xl p-8 text-center cursor-pointer" onclick="document.getElementById('fileInput').click()">
                         <input type="file" id="fileInput" class="hidden" multiple onchange="updateFileList()">
@@ -203,7 +203,7 @@
                         <p class="text-xs text-slate-400 mt-1">またはドラッグ＆ドロップ</p>
                     </div>
                     <p id="sizeErrorMessage" class="text-[10px] text-rose-500 font-bold mt-1 hidden text-center">
-                        <i class="fas fa-exclamation-triangle mr-1"></i>容量制限(30MB)を超えています。ファイルを減らしてください。
+                        <i class="fas fa-exclamation-triangle mr-1"></i>容量制限を超えています。ファイルを減らしてください。
                     </p>
                     <ul id="fileListDisplay" class="mt-4 space-y-2 max-h-40 overflow-y-auto custom-scroll"></ul>
                 </div>
