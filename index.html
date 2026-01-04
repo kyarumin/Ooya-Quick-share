@@ -22,16 +22,17 @@
             --accent: #f43f5e;
         }
 
-        body {
-            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+        body{
+    font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    margin: 0;
+    /* 1. 画面全体を縦並びの箱として定義 */
+    display: flex;
+    flex-direction: column;
+    /* 2. 最低でも画面の高さ100%分は確保する */
+    min-height: 100vh;
+}
         }
 
         /* Loading Screen */
@@ -62,16 +63,22 @@
         }
 
         /* Container & Layout */
-        .app-container {
-            width: 100%;
-            max-width: 420px;
-            background: white;
-            border-radius: 32px;
-            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.03);
-        }
+       .app-container {
+    /* 3. 余ったスペースをこの要素がすべて占有して、フッターを下に押し出す */
+    flex: 1 0 auto;
+    
+    /* 4. align-items: centerの代わりに、margin: autoで中央に寄せる */
+    margin: 40px auto; 
+    
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 32px;
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.03);
+}
 
         .view-content {
             padding: 32px;
@@ -122,12 +129,12 @@
 .app-footer {
     background-color: #3765ad;
     width: 100%;
-    /* 既存のapp-containerの丸みに合わせ、上部だけ少し丸める（アプリ感） */
+    /* 5. フッターが画面外に潰れないように固定 */
+    flex-shrink: 0;
+    
+    padding: 24px 0 40px 0;
     border-top-left-radius: 24px;
     border-top-right-radius: 24px;
-    padding: 24px 0 40px 0; /* 下に少し余裕を持たせる */
-    margin-top: -16px; /* カードの影の下に少し潜り込ませて一体感を出す */
-    z-index: -1; /* カードより下に配置 */
 }
 
 /* リンクの並び */
