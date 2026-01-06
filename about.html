@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ooya QuickShare - 使い方ガイド</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        }
+        .content-card {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.875rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="content-card">
+        <!-- Hero Section -->
+        <div class="bg-blue-600 p-8 text-white text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">Ooya QuickShare</h1>
+            <p class="text-blue-100 text-lg">簡単・素早く・安全なファイル共有</p>
+        </div>
+
+        <div class="p-6 md:p-10">
+            <!-- What it is -->
+            <section class="mb-10">
+                <div class="flex items-center mb-4 text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h2 class="text-xl font-bold">何ができる？</h2>
+                </div>
+                <p class="text-gray-700 leading-relaxed pl-8">
+                    相手に自分のファイルを素早く共有できます。複雑な設定は不要です。
+                </p>
+            </section>
+
+            <!-- How to use -->
+            <section class="mb-10">
+                <div class="flex items-center mb-6 text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    <h2 class="text-xl font-bold">操作方法</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Sending -->
+                    <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                        <h3 class="font-bold text-blue-800 mb-4 flex items-center">
+                            <span class="mr-2">📤</span> 登録・送信
+                        </h3>
+                        <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex items-start"><span class="step-number">1</span> 「送信する」ボタンを押す</li>
+                            <li class="flex items-start"><span class="step-number">2</span> ファイルの題名を入力</li>
+                            <li class="flex items-start"><span class="step-number">3</span> 「クリックして選択」からファイルを選ぶ（最大30MB/複数可）</li>
+                            <li class="flex items-start"><span class="step-number">4</span> アップロード後、発行される<strong class="text-blue-600">5桁のパスコード</strong>を相手に教える</li>
+                        </ul>
+                    </div>
+
+                    <!-- Receiving -->
+                    <div class="bg-green-50 p-5 rounded-xl border border-green-100">
+                        <h3 class="font-bold text-green-800 mb-4 flex items-center">
+                            <span class="mr-2">📥</span> 受信・保存
+                        </h3>
+                        <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex items-start"><span class="step-number">1</span> 「受信する」ボタンを押す</li>
+                            <li class="flex items-start"><span class="step-number">2</span> 5桁のパスコードを「00000」の欄に入力</li>
+                            <li class="flex items-start"><span class="step-number">3</span> コードを確認し「ダウンロード」を押す</li>
+                            <li class="flex items-start"><span class="step-number">4</span> 数秒待つとダウンロードが開始されます</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Warnings -->
+            <section class="mb-10 bg-amber-50 p-6 rounded-xl border border-amber-100">
+                <div class="flex items-center mb-4 text-amber-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h2 class="text-xl font-bold">注意事項</h2>
+                </div>
+                <ul class="grid md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-amber-900 list-disc list-inside">
+                    <li>インターネット接続が必須です</li>
+                    <li>最大容量は30MBまで</li>
+                    <li>処理中は画面を閉じないでください</li>
+                    <li>データはその日のうちに受信してください</li>
+                    <li>複数ファイルはZIP形式になります</li>
+                    <li>パスコードの管理は厳重に</li>
+                    <li><a href="terms_of_service.html" class="underline font-bold hover:text-amber-700">利用規約</a>を必ずご確認ください</li>
+                </ul>
+            </section>
+
+            <!-- Footer Message -->
+            <div class="text-center text-gray-600 italic text-sm">
+                <p>改善点やフィードバックがあれば、ぜひお知らせください。</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
